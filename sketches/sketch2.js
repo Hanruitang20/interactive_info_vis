@@ -1,14 +1,31 @@
-// Instance-mode sketch for tab 2
+// Instance-mode sketch for tab 2 — Flower Clock base version
+// Feature: Draw static petals and a central core (no time interaction yet)
 registerSketch('sk2', function (p) {
+  const W = 800, H = 800;
+
   p.setup = function () {
-    p.createCanvas(p.windowWidth, p.windowHeight);
-  };
-  p.draw = function () {
-    p.background(220);
-    p.fill(100, 150, 240);
-    p.textSize(32);
+    p.createCanvas(W, H);
+    p.angleMode(p.DEGREES);
+    p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
-    p.text('HWK #4. A', p.width / 2, p.height / 2);
   };
-  p.windowResized = function () { p.resizeCanvas(p.windowWidth, p.windowHeight); };
+
+  p.draw = function () {
+    p.background(252);
+    const cx = W / 2, cy = H / 2;
+
+    // Static pink petals
+    p.fill(255, 180, 210);
+    p.push();
+    p.translate(cx, cy);
+    for (let i = 0; i < 12; i++) {
+      p.rotate(30);
+      p.ellipse(0, -80, 50, 100);
+    }
+    p.pop();
+
+    // Flower center
+    p.fill(255, 220, 230);
+    p.ellipse(cx, cy, 80, 80);
+  };
 });
