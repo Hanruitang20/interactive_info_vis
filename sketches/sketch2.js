@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // Instance-mode sketch for tab 2 — commit 1
+=======
+// Instance-mode sketch for tab 2 — Flower Clock base version
+>>>>>>> 41fd892
 // Feature: Draw static petals and a central core (no time interaction yet)
 registerSketch('sk2', function (p) {
   const W = 800, H = 800;
