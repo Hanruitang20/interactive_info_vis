@@ -1,12 +1,16 @@
-// Commit 1: Base setup with one breathing heart and hour-based color background
+// Commit 2: Add random heart placement and time-based generation
 registerSketch('sk3', function (p) {
   const W = 800, H = 800;
-  let paused = false;
+  let heartPositions = [];
+  let startMinute = null;
+
+  const PAD = 120, MIN_DIST = 140, MAX_TRIES = 80;
 
   p.setup = function () {
     p.createCanvas(W, H);
     p.noStroke();
     p.textAlign(p.CENTER, p.CENTER);
+    startMinute = new Date().getMinutes();
   };
 
   function drawHeart(x, y, size, c) {
@@ -20,34 +24,28 @@ registerSketch('sk3', function (p) {
     p.endShape(p.CLOSE);
   }
 
-  function nowSeattle() {
-    return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-  }
+  function dist2(a, b) { const dx = a.x - b.x, dy = a.y - b.y; return dx * dx + dy * dy; }
+  function nowSeattle() { return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })); }
 
-  p.mousePressed = function () { paused = !paused; };
+  function placeHeart() {
+    for (let i = 0; i < MAX_TRIES; i++) {
+      const cand = { x: p.random(PAD, W - PAD), y: p.random(PAD, H - PAD - 60), base: p.random(100, 140) };
+      let ok = true;
+      for (const h of heartPositions) {
+        if (dist2(cand, h) < MIN_DIST * MIN_DIST) { ok = false; break; }
+      }
+      if (ok) { heartPositions.push(cand); return; }
+    }
+  }
 
   p.draw = function () {
     const now = nowSeattle();
-    const hr = now.getHours();
-    const ms = p.millis();
+    const mn = now.getMinutes();
+    if (startMinute === null) startMinute = mn;
+    const timePassed = ((mn - startMinute) + 60) % 60;
+    while (heartPositions.length < timePassed + 1) placeHeart();
 
-    // Background changes with hour (warm → cool)
-    const r = p.map(hr, 0, 23, 255, 120);
-    const g = p.map(hr, 0, 23, 210, 160);
-    const b = p.map(hr, 0, 23, 160, 255);
-    p.background(r, g, b);
-
-    // Heart breathing
-    const phase = (ms % 1000) / 1000 * p.TWO_PI;
-    const breath = paused ? 0 : 0.1 * p.sin(phase);
-
-    const c = p.color(255, 120, 160);
-    const size = 150 * (1 + breath);
-    drawHeart(W / 2, H / 2, size, c);
-
-    // Click interaction hint
-    p.fill(255);
-    p.textSize(18);
-    p.text(paused ? "Click to resume breathing" : "Click to pause breathing", W / 2, H - 20);
+    p.background(200, 180, 255);
+    for (const h of heartPositions) drawHeart(h.x, h.y, h.base, p.color(255, 120, 160, 180));
   };
 });
