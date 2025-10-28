@@ -1,4 +1,4 @@
-// Commit 1: Base Pomodoro layout with timer and selectable duration buttons
+// Commit 2: Add background gradient that changes with minutes
 registerSketch('sk4', function (p) {
   const W = 800, H = 800;
   let startTime = null;
@@ -23,16 +23,18 @@ registerSketch('sk4', function (p) {
   }
 
   p.mousePressed = function () {
-    for (let i = 0; i < buttons.length; i++) {
-      const b = buttons[i];
+    for (let b of buttons) {
       if (p.mouseX > b.x && p.mouseX < b.x + b.w && p.mouseY > b.y && p.mouseY < b.y + b.h) {
-        duration = options[i] * 60 * 1000;
+        duration = parseInt(b.label) * 60 * 1000;
         startTime = p.millis();
         running = true;
-        return;
       }
     }
   };
+
+  function nowSeattle() {
+    return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  }
 
   function formatTime(ms) {
     const totalSec = Math.max(0, Math.floor(ms / 1000));
@@ -42,23 +44,27 @@ registerSketch('sk4', function (p) {
   }
 
   p.draw = function () {
-    p.background(230);
+    const now = nowSeattle();
+    const currentMinute = now.getMinutes() + now.getSeconds() / 60;
+    const warmShift = (currentMinute % 60) / 60;
+    const r = p.lerp(180, 255, warmShift);
+    const g = p.lerp(220, 180, warmShift);
+    const b = p.lerp(255, 200, warmShift);
+    p.background(r, g, b);
+
     const msNow = p.millis();
-    let elapsed = 0;
-    if (running && startTime !== null) elapsed = msNow - startTime;
+    let elapsed = running ? msNow - startTime : 0;
     const remaining = p.constrain(duration - elapsed, 0, duration);
 
-    // Center timer display
+    // Center text
     p.fill(60);
     p.textSize(48);
-    if (running) p.text(formatTime(remaining), W / 2, H / 2);
-    else p.text("Select focus time", W / 2, H / 2);
+    p.text(running ? formatTime(remaining) : "Select focus time", W / 2, H / 2);
 
-    // Draw buttons
     for (let b of buttons) {
       p.fill(255);
       p.rect(b.x, b.y, b.w, b.h, 10);
-      p.fill(50);
+      p.fill(40);
       p.textSize(16);
       p.text(b.label, b.x + b.w / 2, b.y + b.h / 2);
     }
