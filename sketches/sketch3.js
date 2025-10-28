@@ -1,4 +1,4 @@
-// Commit 2: Add random heart placement and time-based generation
+// Commit 3: Add breathing motion and fading by age
 registerSketch('sk3', function (p) {
   const W = 800, H = 800;
   let heartPositions = [];
@@ -40,12 +40,32 @@ registerSketch('sk3', function (p) {
 
   p.draw = function () {
     const now = nowSeattle();
-    const mn = now.getMinutes();
+    const hr = now.getHours(), mn = now.getMinutes();
+    const ms = p.millis();
+
     if (startMinute === null) startMinute = mn;
     const timePassed = ((mn - startMinute) + 60) % 60;
     while (heartPositions.length < timePassed + 1) placeHeart();
 
-    p.background(200, 180, 255);
-    for (const h of heartPositions) drawHeart(h.x, h.y, h.base, p.color(255, 120, 160, 180));
+    const r = p.map(hr, 0, 23, 255, 120);
+    const g = p.map(hr, 0, 23, 210, 160);
+    const b = p.map(hr, 0, 23, 160, 255);
+    p.background(r, g, b);
+
+    const phase = (ms % 1000) / 1000 * p.TWO_PI;
+    const breath = 0.1 * p.sin(phase);
+    const vivid = p.color(255, 120, 160);
+    const muted = p.color(190, 175, 185);
+
+    for (let i = 0; i < heartPositions.length; i++) {
+      const pos = heartPositions[i];
+      const age = heartPositions.length - 1 - i;
+      const t = p.constrain(age / 15, 0, 1);
+      const decay = p.pow(1 - t, 2.2);
+      const col = p.lerpColor(vivid, muted, 1 - decay);
+      col.setAlpha(p.map(decay, 1, 0, 255, 90));
+      const size = pos.base * decay * (1 + breath);
+      drawHeart(pos.x, pos.y, size, col);
+    }
   };
 });
