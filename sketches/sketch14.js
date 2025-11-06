@@ -80,7 +80,7 @@ registerSketch("sk14", function (p) {
     // Title
     p.textAlign(p.CENTER);
     p.fill(20);
-    p.textSize(28);
+    p.textSize(34);
     p.text("Sleep Duration by Gender × BMI Category", p.width / 2, 160);
     p.textSize(18);
     p.text("Overweight students consistently sleep less across genders.", p.width / 2, 190);
@@ -237,7 +237,7 @@ Avg Sleep: ${b.sleep.toFixed(2)}h → ${slInfo.level}
 
     // TITLE (centered)
     p.fill(20);
-    p.textSize(24);
+    p.textSize(40);
     p.textAlign(p.CENTER);
     p.text("Daily Steps vs Sleep Duration (Color = Heart Rate)", p.width / 2, chartTop - 60);
 
